@@ -1,0 +1,4 @@
+{
+  "src/**/*.ts": "yarn tslint",
+  "src/**/*.scss": "yarn sass-lint"
+}
