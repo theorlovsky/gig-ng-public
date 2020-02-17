@@ -287,7 +287,7 @@
       }
     },
     "space-in-parens": true,
-    "strict-boolean-expressions": true,
+    "strict-boolean-expressions": false,
     "strict-type-predicates": true,
     "switch-default": true,
     "template-banana-in-box": true,

@@ -5,7 +5,7 @@
     <mat-hint>Fill 20% of the grid with this character</mat-hint>
   </mat-form-field>
 
-  <button type="button" mat-flat-button color="primary" (click)="generateGrid()">
+  <button type="button" mat-flat-button color="primary" (click)="generateGrid()" [disabled]="buttonDisabled$ | async">
     Generate 2D Grid
   </button>
 </div>
