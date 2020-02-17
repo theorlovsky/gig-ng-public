@@ -1,1 +1,17 @@
-<p>generator works!</p>
+<div class="d-flex align-items-center justify-content-between">
+  <mat-form-field appearance="outline">
+    <mat-label>Character</mat-label>
+    <input type="text" matInput [formControl]="characterControl" placeholder="Character">
+    <mat-hint>Fill 20% of the grid with this character</mat-hint>
+  </mat-form-field>
+
+  <button type="button" mat-flat-button color="primary" (click)="generateGrid()">
+    Generate 2D Grid
+  </button>
+</div>
+
+<table class="mt-2">
+  <tr *ngFor="let row of grid$ | async">
+    <td *ngFor="let cell of row">{{ cell }}</td>
+  </tr>
+</table>
