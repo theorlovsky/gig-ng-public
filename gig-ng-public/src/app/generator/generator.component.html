@@ -10,8 +10,12 @@
   </button>
 </div>
 
-<table class="mt-2">
+<table class="mt-4">
   <tr *ngFor="let row of grid$ | async">
     <td *ngFor="let cell of row">{{ cell }}</td>
   </tr>
 </table>
+
+<div class="d-flex justify-content-center mt-4" *ngIf="code$ | async as code">
+  <div class="code">Your code: {{ code }}</div>
+</div>
