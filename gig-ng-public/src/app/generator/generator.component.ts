@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormBuilder, FormControl } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { GeneratorQuery, GeneratorService } from '@app/state/generator';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, timer } from 'rxjs';
+import { concatMap, distinctUntilChanged, map, mapTo, skip, startWith } from 'rxjs/operators';
 
 @UntilDestroy()
 @Component({
@@ -12,28 +11,58 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./generator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GeneratorComponent {
+export class GeneratorComponent implements OnInit {
 
-  readonly characterControl: FormControl;
+  readonly characterWeight = 0.2;
+  readonly character$: Observable<string>;
   readonly grid$ = this.generatorQuery.grid$;
   readonly code$ = this.generatorQuery.code$;
   readonly buttonDisabled$: Observable<boolean>;
+  readonly characterDisabled$: Observable<boolean>;
 
-  constructor(
-    private fb: FormBuilder,
-    private generatorQuery: GeneratorQuery,
-    private generatorService: GeneratorService,
-  ) {
-    this.characterControl = this.fb.control('');
+  private readonly characterSubject$ = new BehaviorSubject<string>('');
+  private readonly characterChange$: Observable<string>;
+  private readonly characterDebounceTime = 4000;
+
+  constructor(private generatorQuery: GeneratorQuery, private generatorService: GeneratorService) {
+    this.character$ = this.characterSubject$.asObservable();
 
     this.buttonDisabled$ = this.grid$.pipe(
       map((grid) => !!grid.length),
+    );
+
+    this.characterChange$ = this.character$.pipe(
+      distinctUntilChanged(),
       untilDestroyed(this),
     );
+
+    this.characterDisabled$ = this.characterChange$.pipe(
+      skip(1),
+      concatMap(() => (
+        timer(this.characterDebounceTime).pipe(
+          mapTo(false),
+          startWith(true),
+        )),
+      ),
+    );
+  }
+
+  ngOnInit(): void {
+    this.subscribeToCharacterChanges();
   }
 
   generateGrid(): void {
     this.generatorService.activateGenerator();
+  }
+
+  setCharacter(character: string): void {
+    this.characterSubject$.next(character);
+  }
+
+  subscribeToCharacterChanges(): void {
+    this.characterChange$.subscribe((character) => {
+      this.generatorService.setPrimaryCharacter(character, this.characterWeight);
+    });
   }
 
 }
