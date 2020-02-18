@@ -16,7 +16,6 @@ export class GeneratorComponent implements OnInit {
   readonly characterWeight = 0.2;
   readonly character$: Observable<string>;
   readonly grid$ = this.generatorQuery.grid$;
-  readonly code$ = this.generatorQuery.code$;
   readonly buttonDisabled$: Observable<boolean>;
   readonly characterDisabled$: Observable<boolean>;
 
