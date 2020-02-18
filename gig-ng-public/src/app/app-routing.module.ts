@@ -8,6 +8,11 @@ const routes: Routes = [
     component: GeneratorComponent,
   },
   {
+    path: 'payments',
+    loadChildren: () => import('@app/payments/payments.module')
+      .then((m) => m.PaymentsModule),
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'generator',
