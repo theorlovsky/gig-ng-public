@@ -1,0 +1,55 @@
+<div class="d-flex justify-content-center">
+  <app-code></app-code>
+</div>
+
+<form [formGroup]="paymentForm" class="d-flex align-items-center mt-4" (keydown.enter)="addPayment()">
+  <mat-form-field appearance="outline">
+    <mat-label>Payment</mat-label>
+    <input type="text" matInput formControlName="name" placeholder="Payment">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="ml-4">
+    <mat-label>Amount</mat-label>
+    <input type="number" matInput formControlName="amount" placeholder="Amount">
+  </mat-form-field>
+
+  <button
+    type="button"
+    mat-flat-button
+    color="primary"
+    class="ml-4"
+    (click)="addPayment()"
+    [disabled]="paymentForm.invalid"
+  >
+    Add
+  </button>
+</form>
+
+<mat-table [dataSource]="payments$" class="mt-4">
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef>Payment</mat-header-cell>
+    <mat-cell *matCellDef="let payment">{{ payment.name }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="amount">
+    <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
+    <mat-cell *matCellDef="let payment">{{ payment.amount }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="code">
+    <mat-header-cell *matHeaderCellDef>Code</mat-header-cell>
+    <mat-cell *matCellDef="let payment">{{ payment.code }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="grid">
+    <mat-header-cell *matHeaderCellDef>Grid</mat-header-cell>
+    <mat-cell *matCellDef="let payment">
+      <button type="button" mat-button [cdkCopyToClipboard]="stringifyGrid(payment.grid)">
+        Copy to clipboard
+      </button>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="columns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: columns"></mat-row>
+</mat-table>
