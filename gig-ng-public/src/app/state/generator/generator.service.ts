@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { getRandomString } from '@app/utils';
+import { chunk, getRandomString } from '@app/utils';
 import { UntilDestroy } from '@ngneat/until-destroy';
 import moment from 'moment';
 import { interval, Observable, Subscription } from 'rxjs';
@@ -16,6 +16,9 @@ export class GeneratorService {
   private readonly gridGenerator$: Observable<GeneratorState['grid']>;
   private readonly codeGenerator$: Observable<GeneratorState['code']>;
   private readonly subscriptions: Subscription[] = [];
+
+  private primaryCharacter = '';
+  private primaryCharacterWeight = 0;
 
   constructor(private gridStore: GeneratorStore) {
     this.gridGenerator$ = interval(this.generateInterval).pipe(
@@ -44,21 +47,19 @@ export class GeneratorService {
     this.subscriptions.push(codeSubscription);
   }
 
+  setPrimaryCharacter(character: string, primaryCharacterWeight: number): void {
+    this.primaryCharacter = character;
+    this.primaryCharacterWeight = primaryCharacterWeight;
+  }
+
   private generateGrid(): GeneratorState['grid'] {
-    return [...Array(this.gridSize)].map(() => {
-      return [...Array(this.gridSize)].map(() => {
-        let validChar = '';
+    const charCount = Math.pow(this.gridSize, 2);
+    const primaryCharacters = this.getPrimaryCharacters(charCount);
+    const randomCharacters = this.generateCharactersForGrid(charCount - primaryCharacters.length);
+    const charactersForGrid = primaryCharacters + randomCharacters;
+    const shuffledCharacters = [...charactersForGrid.split('')].sort(() => Math.random() - 0.5);
 
-        while (!validChar) {
-          const randomString = getRandomString();
-          const match = this.validCharRegex.exec(randomString);
-
-          validChar = match ? match[0] : '';
-        }
-
-        return validChar;
-      });
-    });
+    return chunk(shuffledCharacters, this.gridSize);
   }
 
   private generateCode(grid: GeneratorState['grid']): GeneratorState['code'] {
@@ -98,6 +99,36 @@ export class GeneratorService {
     }
 
     return counter;
+  }
+
+  private getPrimaryCharacters(charCount: number): string {
+    if (!this.primaryCharacter) {
+      return '';
+    }
+
+    const primaryCharacterCount = Math.round(charCount * this.primaryCharacterWeight);
+
+    // tslint:disable-next-line no-assign-mutated-array
+    return new Array(primaryCharacterCount).fill(this.primaryCharacter).join('');
+  }
+
+  private generateCharactersForGrid(targetCount: number): string {
+    return new Array(targetCount)
+      // tslint:disable-next-line no-assign-mutated-array
+      .fill(0)
+      .map(() => {
+        let validChar = '';
+
+        while (!validChar) {
+          const randomString = getRandomString();
+          const match = this.validCharRegex.exec(randomString);
+
+          validChar = match ? match[0] : '';
+        }
+
+        return validChar;
+      })
+      .join('');
   }
 
 }

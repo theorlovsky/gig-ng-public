@@ -1,8 +1,16 @@
 <div class="d-flex align-items-center justify-content-between">
   <mat-form-field appearance="outline">
     <mat-label>Character</mat-label>
-    <input type="text" matInput [formControl]="characterControl" placeholder="Character">
-    <mat-hint>Fill 20% of the grid with this character</mat-hint>
+    <input
+      type="text"
+      matInput
+      maxlength="1"
+      placeholder="Character"
+      [ngModel]="character$ | async"
+      (ngModelChange)="setCharacter($event)"
+      [disabled]="(characterDisabled$ | async) === true"
+    >
+    <mat-hint>Fill {{ characterWeight | percent }} of the grid with this character</mat-hint>
   </mat-form-field>
 
   <button type="button" mat-flat-button color="primary" (click)="generateGrid()" [disabled]="buttonDisabled$ | async">
