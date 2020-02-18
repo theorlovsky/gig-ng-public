@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { getRandomString } from '@app/utils';
-import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { UntilDestroy } from '@ngneat/until-destroy';
+import moment from 'moment';
 import { interval, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { GeneratorState, GeneratorStore } from './generator.store';
 
-@UntilDestroy({ checkProperties: true })
+@UntilDestroy({ arrayName: 'subscriptions' })
 @Injectable({ providedIn: 'root' })
 export class GeneratorService {
 
@@ -13,25 +14,34 @@ export class GeneratorService {
   private readonly validCharRegex = /[a-z]/;
   private readonly generateInterval = 2000;
   private readonly gridGenerator$: Observable<GeneratorState['grid']>;
-
-  private subscription: Subscription | null = null;
+  private readonly codeGenerator$: Observable<GeneratorState['code']>;
+  private readonly subscriptions: Subscription[] = [];
 
   constructor(private gridStore: GeneratorStore) {
     this.gridGenerator$ = interval(this.generateInterval).pipe(
       map(() => this.generateGrid()),
       startWith(this.generateGrid()),
-      untilDestroyed(this),
+    );
+
+    this.codeGenerator$ = this.gridGenerator$.pipe(
+      map((grid) => this.generateCode(grid)),
     );
   }
 
   activateGenerator(): void {
-    if (this.subscription) {
+    if (this.subscriptions.length) {
       return;
     }
 
-    this.subscription = this.gridGenerator$.subscribe((grid) => {
+    const gridSubscription = this.gridGenerator$.subscribe((grid) => {
       this.gridStore.update({ grid });
     });
+    const codeSubscription = this.codeGenerator$.subscribe((code) => {
+      this.gridStore.update({ code });
+    });
+
+    this.subscriptions.push(gridSubscription);
+    this.subscriptions.push(codeSubscription);
   }
 
   private generateGrid(): GeneratorState['grid'] {
@@ -49,6 +59,45 @@ export class GeneratorService {
         return validChar;
       });
     });
+  }
+
+  private generateCode(grid: GeneratorState['grid']): GeneratorState['code'] {
+    const seconds = moment().format('ss');
+
+    const coordinate1 = +seconds[0];
+    const coordinate2 = +seconds[1];
+
+    const value1 = this.getGridValue(grid, coordinate1, coordinate2);
+    const value2 = this.getGridValue(grid, coordinate2, coordinate1);
+
+    const occurrences1 = this.countOccurrences(grid, value1);
+    const occurrences2 = this.countOccurrences(grid, value2);
+
+    return `${ occurrences1 }${ occurrences2 }`;
+  }
+
+  private getGridValue(grid: GeneratorState['grid'], x: number, y: number): string {
+    return grid[x][y];
+  }
+
+  private countOccurrences(grid: GeneratorState['grid'], value: string): number {
+    let counter = 0;
+    let divideInteger = 2;
+
+    grid
+      .flatMap((row) => row)
+      .forEach((cell) => {
+        if (cell === value) {
+          counter++;
+        }
+      });
+
+    while (counter > 9) {
+      counter = Math.ceil(counter / divideInteger);
+      divideInteger++;
+    }
+
+    return counter;
   }
 
 }

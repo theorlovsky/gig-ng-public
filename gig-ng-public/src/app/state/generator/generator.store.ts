@@ -3,11 +3,13 @@ import { Store, StoreConfig } from '@datorama/akita';
 
 export interface GeneratorState {
   grid: string[][];
+  code: string;
 }
 
 export function createInitialState(): GeneratorState {
   return {
     grid: [],
+    code: '',
   };
 }
 

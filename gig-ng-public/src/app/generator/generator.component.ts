@@ -16,6 +16,7 @@ export class GeneratorComponent {
 
   readonly characterControl: FormControl;
   readonly grid$ = this.generatorQuery.grid$;
+  readonly code$ = this.generatorQuery.code$;
   readonly buttonDisabled$: Observable<boolean>;
 
   constructor(

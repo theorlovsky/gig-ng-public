@@ -17,12 +17,14 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "es2015",
+    "allowSyntheticDefaultImports": true,
     "typeRoots": [
       "node_modules/@types"
     ],
     "lib": [
       "es2018",
-      "dom"
+      "dom",
+      "esnext.array"
     ],
     "paths": {
       "@app/*": [
