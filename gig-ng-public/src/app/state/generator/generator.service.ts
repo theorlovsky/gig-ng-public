@@ -3,20 +3,20 @@ import { getRandomString } from '@app/utils';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { interval, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { GridState, GridStore } from './grid.store';
+import { GeneratorState, GeneratorStore } from './generator.store';
 
 @UntilDestroy({ checkProperties: true })
 @Injectable({ providedIn: 'root' })
-export class GridService {
+export class GeneratorService {
 
   private readonly gridSize = 10;
   private readonly validCharRegex = /[a-z]/;
   private readonly generateInterval = 2000;
-  private readonly gridGenerator$: Observable<GridState['grid']>;
+  private readonly gridGenerator$: Observable<GeneratorState['grid']>;
 
   private subscription: Subscription | null = null;
 
-  constructor(private gridStore: GridStore) {
+  constructor(private gridStore: GeneratorStore) {
     this.gridGenerator$ = interval(this.generateInterval).pipe(
       map(() => this.generateGrid()),
       startWith(this.generateGrid()),
@@ -34,7 +34,7 @@ export class GridService {
     });
   }
 
-  private generateGrid(): GridState['grid'] {
+  private generateGrid(): GeneratorState['grid'] {
     return [...Array(this.gridSize)].map(() => {
       return [...Array(this.gridSize)].map(() => {
         let validChar = '';

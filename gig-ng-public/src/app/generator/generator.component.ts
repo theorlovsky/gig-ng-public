@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormBuilder, FormControl } from '@angular/forms';
-import { GridQuery, GridService } from '@app/generator/state/grid';
+import { GeneratorQuery, GeneratorService } from '@app/state/generator';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -15,10 +15,14 @@ import { map } from 'rxjs/operators';
 export class GeneratorComponent {
 
   readonly characterControl: FormControl;
-  readonly grid$ = this.gridQuery.grid$;
+  readonly grid$ = this.generatorQuery.grid$;
   readonly buttonDisabled$: Observable<boolean>;
 
-  constructor(private fb: FormBuilder, private gridQuery: GridQuery, private gridService: GridService) {
+  constructor(
+    private fb: FormBuilder,
+    private generatorQuery: GeneratorQuery,
+    private generatorService: GeneratorService,
+  ) {
     this.characterControl = this.fb.control('');
 
     this.buttonDisabled$ = this.grid$.pipe(
@@ -28,7 +32,7 @@ export class GeneratorComponent {
   }
 
   generateGrid(): void {
-    this.gridService.activateGenerator();
+    this.generatorService.activateGenerator();
   }
 
 }
